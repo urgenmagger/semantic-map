@@ -1,8 +1,7 @@
 import { Router, Request, Response } from "express";
 import { getEmbeddings } from "../services/embedding";
 import { topPairs, cosineSimilarity } from "../services/similarity";
-import { pca } from "../services/projection";
-import { tsne } from "../services/tsne";
+import { pca, runUmap } from "../services/projection";
 import { getContextualText } from "../services/context";
 import type {
   AnalyzeRequest,
@@ -47,7 +46,7 @@ router.post("/", async (req: Request, res: Response) => {
     const pairs = topPairs(keywords, embeddings);
 
     const coords2d =
-      method === "tsne" ? tsne(embeddings, 2) : pca(embeddings, 2);
+      method === "umap" ? runUmap(embeddings, 2) : pca(embeddings, 2);
 
     const points: AnalyzePoint[] = keywords.map((keyword, i) => ({
       keyword,

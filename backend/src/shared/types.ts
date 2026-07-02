@@ -1,5 +1,5 @@
 export type KeywordType = "paid" | "organic";
-export type ProjectionMethod = "pca" | "tsne";
+export type ProjectionMethod = "pca" | "umap";
 
 export interface AnalyzeRequest {
   keywords: string[];
