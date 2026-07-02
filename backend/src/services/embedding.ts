@@ -1,3 +1,5 @@
+import fetch from "node-fetch";
+import { SocksProxyAgent } from "socks-proxy-agent";
 import { config } from "../config";
 
 interface EmbeddingResponse {
@@ -8,21 +10,30 @@ interface EmbeddingResponse {
 
 export async function getEmbeddings(texts: string[]): Promise<number[][]> {
   const results: number[][] = [];
+  const agent = config.socksProxy
+    ? new SocksProxyAgent(config.socksProxy)
+    : undefined;
 
   for (let i = 0; i < texts.length; i++) {
     const text = texts[i];
     const url = `${config.embeddingEndpoint}/models/${config.embeddingModel}:embedContent?key=${config.geminiApiKey}`;
 
-    let res: Response;
+    const fetchOptions: any = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: `models/${config.embeddingModel}`,
+        content: { parts: [{ text }] },
+      }),
+    };
+
+    if (agent) {
+      fetchOptions.agent = agent;
+    }
+
+    let res;
     try {
-      res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: `models/${config.embeddingModel}`,
-          content: { parts: [{ text }] },
-        }),
-      });
+      res = await fetch(url, fetchOptions);
     } catch {
       throw new Error(
         "Failed to connect to Gemini API. Check your network connection."
@@ -43,12 +54,10 @@ export async function getEmbeddings(texts: string[]): Promise<number[][]> {
           "Gemini API rate limit exceeded. Wait and try again."
         );
       }
-      throw new Error(
-        `Gemini API error ${status}: ${body.slice(0, 200)}`
-      );
+      throw new Error(`Gemini API error ${status}: ${body.slice(0, 200)}`);
     }
 
-    const data: EmbeddingResponse = await res.json();
+    const data = (await res.json()) as EmbeddingResponse;
     results.push(data.embedding.values);
   }
 
