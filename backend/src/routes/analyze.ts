@@ -3,6 +3,7 @@ import { getEmbeddings } from "../services/embedding";
 import { topPairs, cosineSimilarity } from "../services/similarity";
 import { pca, runUmap } from "../services/projection";
 import { getContextualText } from "../services/context";
+import { validateApiKey } from "../config";
 import type {
   AnalyzeRequest,
   AnalyzeResponse,
@@ -31,22 +32,63 @@ function nearestKeywords(
 
 router.post("/", async (req: Request, res: Response) => {
   try {
-    const { keywords, types, method = "pca" }: AnalyzeRequest = req.body;
+    const {
+      keywords,
+      types,
+      method = "pca",
+      threshold = 0,
+      topN = 25,
+    }: AnalyzeRequest = req.body;
 
-    if (!keywords || !Array.isArray(keywords) || keywords.length === 0) {
-      res.status(400).json({ error: "keywords array required" });
+    if (!keywords || !Array.isArray(keywords)) {
+      res.status(400).json({
+        error: "Invalid input",
+        message: '"keywords" must be an array of strings.',
+      });
+      return;
+    }
+
+    if (keywords.length < 2) {
+      res.status(400).json({
+        error: "Not enough keywords",
+        message: "At least 2 keywords are required for pairwise similarity.",
+      });
+      return;
+    }
+
+    const keyError = validateApiKey();
+    if (keyError) {
+      res.status(500).json({
+        error: "Embedding API error",
+        message: keyError,
+      });
       return;
     }
 
     const contexts = keywords.map(getContextualText);
-    console.log("Embedding contexts:", JSON.stringify(contexts, null, 2));
 
-    const embeddings = await getEmbeddings(contexts);
+    let embeddings: number[][];
+    try {
+      embeddings = await getEmbeddings(contexts);
+    } catch (err: any) {
+      res.status(502).json({
+        error: "Embedding API error",
+        message:
+          err.message ||
+          "Failed to generate embeddings. Check GEMINI_API_KEY, API quota or billing settings.",
+      });
+      return;
+    }
 
-    const pairs = topPairs(keywords, embeddings);
+    const pairs = topPairs(keywords, embeddings, topN, threshold);
 
-    const coords2d =
-      method === "umap" ? runUmap(embeddings, 2) : pca(embeddings, 2);
+    let coords2d: number[][];
+    try {
+      coords2d =
+        method === "umap" ? runUmap(embeddings, 2) : pca(embeddings, 2);
+    } catch {
+      coords2d = pca(embeddings, 2);
+    }
 
     const points: AnalyzePoint[] = keywords.map((keyword, i) => ({
       keyword,
@@ -72,7 +114,10 @@ router.post("/", async (req: Request, res: Response) => {
     res.json(response);
   } catch (err: any) {
     console.error(err);
-    res.status(500).json({ error: err.message || "Internal error" });
+    res.status(500).json({
+      error: "Internal error",
+      message: err.message || "Unexpected server error.",
+    });
   }
 });
 

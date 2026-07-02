@@ -37,6 +37,14 @@ h2 {
   margin-bottom: 24px;
 }
 
+.input-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 8px;
+}
+
 .input-card textarea {
   width: 100%;
   border: 1px solid #e2e8f0;
@@ -47,14 +55,26 @@ h2 {
   resize: vertical;
   outline: none;
   transition: border-color 0.15s;
+  min-height: 140px;
 }
 
 .input-card textarea:focus {
   border-color: #8b5cf6;
 }
 
-.input-card button {
+.input-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-top: 12px;
+}
+
+.input-count {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.input-card button {
   padding: 10px 24px;
   border: none;
   border-radius: 8px;
@@ -73,6 +93,20 @@ h2 {
 .input-card button:disabled {
   background: #c4b5fd;
   cursor: not-allowed;
+}
+
+.checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  accent-color: #8b5cf6;
 }
 
 .metrics-grid {
@@ -121,18 +155,39 @@ h2 {
 }
 
 .controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
   margin-bottom: 24px;
 }
 
-.method-label {
+.results-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.results-grid .card {
+  margin-bottom: 0;
+}
+
+@media (max-width: 1024px) {
+  .results-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.select-label {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   font-size: 14px;
   color: #64748b;
+  white-space: nowrap;
 }
 
-.method-label select {
+.select-label select {
   padding: 6px 12px;
   border: 1px solid #e2e8f0;
   border-radius: 6px;
@@ -141,6 +196,16 @@ h2 {
   background: #fff;
   cursor: pointer;
   outline: none;
+}
+
+.select-label input[type="range"] {
+  width: 120px;
+  accent-color: #8b5cf6;
+}
+
+.table-scroll {
+  max-height: 500px;
+  overflow-y: auto;
 }
 
 .similarity-table {
@@ -155,6 +220,9 @@ h2 {
   color: #64748b;
   font-weight: 600;
   border-bottom: 2px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  background: #fff;
 }
 
 .similarity-table td {

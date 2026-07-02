@@ -9,21 +9,42 @@ interface EmbeddingResponse {
 export async function getEmbeddings(texts: string[]): Promise<number[][]> {
   const results: number[][] = [];
 
-  for (const text of texts) {
+  for (let i = 0; i < texts.length; i++) {
+    const text = texts[i];
     const url = `${config.embeddingEndpoint}/models/${config.embeddingModel}:embedContent?key=${config.geminiApiKey}`;
 
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: `models/${config.embeddingModel}`,
-        content: { parts: [{ text }] },
-      }),
-    });
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: `models/${config.embeddingModel}`,
+          content: { parts: [{ text }] },
+        }),
+      });
+    } catch {
+      throw new Error(
+        "Failed to connect to Gemini API. Check your network connection."
+      );
+    }
 
     if (!res.ok) {
+      const body = await res.text();
+      const status = res.status;
+
+      if (status === 403 || status === 401) {
+        throw new Error(
+          "Gemini API authentication failed. Check your GEMINI_API_KEY."
+        );
+      }
+      if (status === 429) {
+        throw new Error(
+          "Gemini API rate limit exceeded. Wait and try again."
+        );
+      }
       throw new Error(
-        `Embedding failed for "${text}": ${res.status} ${await res.text()}`
+        `Gemini API error ${status}: ${body.slice(0, 200)}`
       );
     }
 
