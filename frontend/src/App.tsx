@@ -52,7 +52,7 @@ export default function App() {
             onChange={(e) => setMethod(e.target.value as ProjectionMethod)}
           >
             <option value="pca">PCA</option>
-            <option value="tsne">t-SNE</option>
+            <option value="umap">UMAP</option>
           </select>
         </label>
       </div>
