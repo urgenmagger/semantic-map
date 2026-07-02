@@ -1,5 +1,4 @@
 import fetch from "node-fetch";
-import { SocksProxyAgent } from "socks-proxy-agent";
 import { config } from "../config";
 
 interface EmbeddingResponse {
@@ -10,9 +9,6 @@ interface EmbeddingResponse {
 
 export async function getEmbeddings(texts: string[]): Promise<number[][]> {
   const results: number[][] = [];
-  const agent = config.socksProxy
-    ? new SocksProxyAgent(config.socksProxy)
-    : undefined;
 
   for (let i = 0; i < texts.length; i++) {
     const text = texts[i];
@@ -26,10 +22,6 @@ export async function getEmbeddings(texts: string[]): Promise<number[][]> {
         content: { parts: [{ text }] },
       }),
     };
-
-    if (agent) {
-      fetchOptions.agent = agent;
-    }
 
     let res;
     try {

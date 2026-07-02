@@ -5,6 +5,10 @@
 Анализ семантической близости ключевых слов:
 keywords → Gemini embeddings → cosine similarity → сортировка пар по убыванию + 2D semantic map.
 
+## Демо
+
+https://vector-eight-sage.vercel.app/
+
 ## Быстрый старт
 
 ```bash
