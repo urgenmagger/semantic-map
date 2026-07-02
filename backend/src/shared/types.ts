@@ -5,6 +5,8 @@ export interface AnalyzeRequest {
   keywords: string[];
   types?: KeywordType[];
   method?: ProjectionMethod;
+  threshold?: number;
+  topN?: number;
 }
 
 export interface NearestKeyword {

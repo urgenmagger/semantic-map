@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Plot from "react-plotly.js";
 import type { AnalyzePoint } from "../shared/types";
 
@@ -11,6 +12,12 @@ const COLORS: Record<string, string> = {
   centroid: "#cbd5e1",
 };
 
+const LEGEND: Record<string, string> = {
+  paid: "Платные",
+  organic: "Органические",
+  centroid: "Центроиды",
+};
+
 function formatNearest(point: AnalyzePoint): string {
   return point.nearest
     .map(
@@ -21,11 +28,13 @@ function formatNearest(point: AnalyzePoint): string {
 }
 
 export default function SemanticMap({ points }: Props) {
+  const [showLabels, setShowLabels] = useState(true);
+
   if (points.length === 0) {
     return (
       <div className="card map-card">
-        <h2>Keywords Semantic Map</h2>
-        <p className="empty-state">Вставьте keywords и нажмите Analyze</p>
+        <h2>Семантическая карта</h2>
+        <p className="empty-state">Вставьте ключевые слова и нажмите Анализировать</p>
       </div>
     );
   }
@@ -40,11 +49,11 @@ export default function SemanticMap({ points }: Props) {
       text: filtered.map((p) => p.keyword),
       hovertext: filtered.map(
         (p) =>
-          `<b>${p.keyword}</b><br><i>${p.embeddingText}</i><br><br>Nearest:${formatNearest(p)}`
+          `<b>${p.keyword}</b><br><i>${p.embeddingText}</i><br><br>Ближайшие:${formatNearest(p)}`
       ),
       type: "scatter" as const,
-      mode: "markers+text" as const,
-      name: type,
+      mode: showLabels ? ("markers+text" as const) : ("markers" as const),
+      name: LEGEND[type] || type,
       marker: {
         color,
         size: 14,
@@ -59,12 +68,24 @@ export default function SemanticMap({ points }: Props) {
 
   return (
     <div className="card map-card">
-      <h2>Keywords Semantic Map</h2>
+      <h2>Семантическая карта</h2>
+      <p className="hint">
+        Карта — 2D-проекция embedding-векторов (PCA/UMAP). Расстояния могут
+        искажаться. Точные значения сходства — в таблице справа.
+      </p>
+      <label className="checkbox-label">
+        <input
+          type="checkbox"
+          checked={showLabels}
+          onChange={(e) => setShowLabels(e.target.checked)}
+        />
+        Показывать подписи
+      </label>
       <Plot
         data={traces as any}
         layout={{
           autosize: true,
-          height: 500,
+          height: 400,
           margin: { t: 10, r: 20, b: 40, l: 40 },
           xaxis: { zeroline: false, showgrid: true, gridcolor: "#e2e8f0" },
           yaxis: { zeroline: false, showgrid: true, gridcolor: "#e2e8f0" },
