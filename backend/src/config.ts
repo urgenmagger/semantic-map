@@ -3,6 +3,7 @@ export const config = {
   geminiApiKey: process.env.GEMINI_API_KEY || "",
   embeddingModel: "gemini-embedding-001",
   embeddingEndpoint: "https://generativelanguage.googleapis.com/v1beta",
+  socksProxy: process.env.SOCKS_PROXY || "",
 };
 
 export function validateApiKey(): string | null {
