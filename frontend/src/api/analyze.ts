@@ -12,7 +12,10 @@ export async function analyzeKeywords(
   });
 
   if (!res.ok) {
-    throw new Error(`API error: ${res.status}`);
+    const body = await res.json().catch(() => ({}));
+    throw new Error(
+      body.message || `API error: ${res.status}`
+    );
   }
 
   return res.json();

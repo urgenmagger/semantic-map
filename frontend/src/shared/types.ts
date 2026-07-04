@@ -1,9 +1,7 @@
-export type KeywordType = "paid" | "organic";
 export type ProjectionMethod = "pca" | "umap";
 
 export interface AnalyzeRequest {
   keywords: string[];
-  types?: KeywordType[];
   method?: ProjectionMethod;
   threshold?: number;
   topN?: number;
@@ -17,7 +15,6 @@ export interface NearestKeyword {
 export interface AnalyzePoint {
   keyword: string;
   embeddingText: string;
-  type: KeywordType;
   x: number;
   y: number;
   nearest: NearestKeyword[];
@@ -31,9 +28,6 @@ export interface PairResult {
 
 export interface AnalyzeStats {
   totalKeywords: number;
-  paidKeywords: number;
-  organicKeywords: number;
-  coverageScore: number;
 }
 
 export interface AnalyzeResponse {
