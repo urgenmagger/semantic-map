@@ -8,7 +8,7 @@
 
 ## Демо
 
-http://157.22.252.36
+https://frontend-three-black-67.vercel.app
 
 ## Быстрый старт
 
